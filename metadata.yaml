@@ -9,8 +9,14 @@ desc: >
 short_desc: 搜索 / 下载皮肤（3D 预览 + 原始文件分开发），多站点，支持自然语言
 author: yunfang1718128
 repo: https://github.com/yunfang1718128/astrbot_plugin_skinsite_skin
-version: 1.5.1
+version: 1.5.2
 astrbot_version: ">=4.29.0"
 support_platforms:
   - aiocqhttp
   - webchat
+tags:
+  - 查询
+  - Minecraft
+  - 皮肤站
+  - LittleSkin
+  - Blessing Skin
