@@ -5,8 +5,8 @@
 出口有两条，共用同一套业务层：
 
 - 指令：`/skin search|get|raw|view|rand|sites`，以及裸关键词的 CustomFilter；
-- LLM 函数工具：`littleskin_search`（返回已清洗的皮肤名清单）、
-  `littleskin_skin_image`（渲染后直接 `event.send` 发图）。
+- LLM 函数工具：`skinsite_search`（返回已清洗的皮肤名清单）、
+  `skinsite_skin_image`（渲染后直接 `event.send` 发图）。
 
 多站点：`sites` 里一行一个站，命令末尾加 `-s 别名` 指定；不带就是默认站。
 皮肤文件（64×64 原图）默认以**文件附件**单独发送，与渲染图分开（见 `_send_skin_file`）。
@@ -102,9 +102,9 @@ def _default_cache_root() -> str:
     try:
         from astrbot.core.utils.astrbot_path import get_astrbot_plugin_data_path
 
-        return os.path.join(get_astrbot_plugin_data_path(), "littleskin_skin", "cache")
+        return os.path.join(get_astrbot_plugin_data_path(), "astrbot_plugin_skinsite_skin", "cache")
     except Exception:  # noqa: BLE001  脱离 AstrBot 运行时（自测）时的兜底
-        return os.path.join(os.getcwd(), "data", "plugin_data", "littleskin_skin", "cache")
+        return os.path.join(os.getcwd(), "data", "plugin_data", "astrbot_plugin_skinsite_skin", "cache")
 
 
 def _int(conf: dict, key: str, default: int, lo: int, hi: int) -> int:
@@ -145,7 +145,7 @@ class Main(star.Star):
         except TypeError:  # 兼容只接受 context 的旧版 Star
             super().__init__(context)
         self.conf: dict = dict(config or {})
-        self.logger = getattr(self, "logger", None) or logging.getLogger("littleskin_skin")
+        self.logger = getattr(self, "logger", None) or logging.getLogger("astrbot_plugin_skinsite_skin")
         self.sites: list[SiteRuntime] = []
         self.default: SiteRuntime | None = None
         self.cache: TextureCache | None = None
@@ -223,7 +223,7 @@ class Main(star.Star):
             self.default = self._pick_default(sites, conf)
             self.init_error = ""
             self.logger.info(
-                "littleskin_skin ready: sites=%s default=%s cache=%s",
+                "astrbot_plugin_skinsite_skin ready: sites=%s default=%s cache=%s",
                 ",".join(f"{rt.alias}({rt.base_url})" for rt in sites),
                 self.default.alias,
                 cache_dir,
@@ -421,7 +421,7 @@ class Main(star.Star):
         """下载 + 渲染，返回 (渲染图路径, 原始纹理路径, 图注, 皮肤名)。
 
         raw=True 时渲染图路径就是原图路径。失败抛 NotFoundError / SkinError。
-        指令（`_get`）和 llm 工具（`littleskin_skin_image`）共用这一条路径，
+        指令（`_get`）和 llm 工具（`skinsite_skin_image`）共用这一条路径，
         免得两边各写一套、以后改了一边忘另一边。
         """
         max_pixels = _int(self.conf, "max_image_pixels", 4_000_000, 1024, 4_000_000)
@@ -612,7 +612,7 @@ class Main(star.Star):
     # 只做两件事：查名字、发图。所有参数都是结构化字符串，不给模型「传 JSON 让插件干别的」的口子；
     # 返回给模型的永远是 clean_text 清洗 + 截断后的文本，站点原始 JSON 不进上下文。
 
-    @filter.llm_tool(name="littleskin_search")
+    @filter.llm_tool(name="skinsite_search")
     async def tool_search(self, event: AstrMessageEvent, keyword: str, site: str = "") -> str:
         """在皮肤站搜索 Minecraft 皮肤，返回皮肤名清单。用户想找/想换某个 MC 皮肤时先用这个。
 
@@ -620,7 +620,7 @@ class Main(star.Star):
 
         Args:
             keyword(string): 搜索关键词，角色名、作品名或皮肤名，中英文都行
-            site(string): 站点别名，留空用默认站；多个站时才需要填（用 littleskin_sites 可以查）
+            site(string): 站点别名，留空用默认站；多个站时才需要填（用 skinsite_sites 可以查）
         """
         if not self.sites or self.init_error:
             return f"皮肤站插件不可用：{self.init_error or '尚未初始化'}"
@@ -647,11 +647,11 @@ class Main(star.Star):
         shown = items[: min(_int(self.conf, "max_results", 5, 1, 10), 8)]
         lines = [f"{prefix}搜到 {len(items)} 条，前 {len(shown)} 个："]
         lines += [f"{idx}. {clean_text(item.name)}" for idx, item in enumerate(shown, 1)]
-        hint = "要发其中某一张就调用 littleskin_skin_image，name 原样填上面的皮肤名"
+        hint = "要发其中某一张就调用 skinsite_skin_image，name 原样填上面的皮肤名"
         lines.append(hint + (f"，site 填 {rt.alias}。" if len(self.sites) > 1 else "。"))
         return "\n".join(lines)
 
-    @filter.llm_tool(name="littleskin_sites")
+    @filter.llm_tool(name="skinsite_sites")
     async def tool_sites(self, event: AstrMessageEvent) -> str:
         """列出已配置的皮肤站别名。用户提到某个皮肤站、或需要指定站点时先用它。"""
         if not self.sites:
@@ -662,14 +662,14 @@ class Main(star.Star):
             lines.append(f"· {rt.alias}：{rt.base_url}{mark}")
         return "\n".join(lines)
 
-    @filter.llm_tool(name="littleskin_skin_image")
+    @filter.llm_tool(name="skinsite_skin_image")
     async def tool_skin_image(self, event: AstrMessageEvent, name: str, site: str = "") -> str:
         """把一张 MC 皮肤渲染成 3D 预览图、并把原始皮肤文件一起发给用户。用户说「发一下 / 给我看看 / 来一张」某个皮肤时用这个。
 
         用户一次要好几张就连续调用多次，间隔够 1 秒即可。
 
         Args:
-            name(string): 皮肤名（用 littleskin_search 搜到的名字，原样填），或纯数字的 tid
+            name(string): 皮肤名（用 skinsite_search 搜到的名字，原样填），或纯数字的 tid
             site(string): 站点别名，留空用默认站；多个站时才需要填
         """
         if err := await self._guard(event, ns="tool", cap=1.0):
@@ -823,7 +823,7 @@ def render_to_bytes(image, plan: dict) -> bytes:
         # 3D 只是附加的一栏，渲染不出来时宁可退回 2D，也不能整条消息失败。
         if not plan.get("three_d"):
             raise
-        logging.getLogger("littleskin_skin").warning("3d preview failed: %s", exc)
+        logging.getLogger("astrbot_plugin_skinsite_skin").warning("3d preview failed: %s", exc)
         out = render_preview(image, **{**plan, "three_d": False})
     buf = io.BytesIO()
     out.save(buf, format="PNG", optimize=True)

@@ -22,7 +22,7 @@
 | --- | --- | --- |
 | `/skin …` 指令组 | 用户手打 | 零 LLM 开销 |
 | 裸 `/skin <关键词>` | `CustomFilter`（`SkinKeywordFilter`） | 命令组不接受任意位置参数，这是 AstrBot 的限制 |
-| LLM 工具 | 模型自己调 | `littleskin_search` / `littleskin_sites` / `littleskin_skin_image` |
+| LLM 工具 | 模型自己调 | `skinsite_search` / `skinsite_sites` / `skinsite_skin_image` |
 
 指令和工具都走 `_render_skin()`，改下载/渲染只有一处需要改。
 

@@ -1,8 +1,8 @@
-# littleskin_skin — 在群里查 Minecraft 皮肤
+# 皮肤站皮肤查询 — 在群里查 Minecraft 皮肤
 
-一个 AstrBot 插件。支持在群内让astrbot检索我的世界各大皮肤站，机器人会找到相关皮肤并且发送：
+一个 AstrBot 插件。在群里发一句，机器人去你配置的皮肤站（默认 `littleskin.cn`）搜，然后把结果发回来：
 
-1. ** 3D 预览图**（正面 / 斜 30° / 背面）
+1. **3D 预览图**（正面 / 斜 30° / 背面）
 2. **皮肤文件**（原始 64×64 PNG，可以直接下载导入游戏或皮肤站）
 
 也可以直接使用自然语言命令，模型会自己搜索、自动发送。
@@ -16,8 +16,8 @@
 
 ## 安装
 
-1. 把这个目录放进 AstrBot 的 `data/plugins/`或者在插件市场安装
-2. 依赖：`aiohttp`、`pillow`、`yarl`
+1. 把这个目录放进 AstrBot 的 `data/plugins/`，或者直接在插件市场搜索安装
+2. 依赖：`aiohttp`、`pillow`、`yarl`（仓库里有 `requirements.txt`，市场安装会自动装）
 3. 重启或重载插件 —— **默认配置开箱即用**，默认连 `littleskin.cn`
 
 ## 怎么用
@@ -63,8 +63,8 @@
    `id` / `title` / `model` 之类，再加几个配置项就行（`field_tid`、`field_name`、`field_hash`、
    `list_key`…）。完整清单和新站体检方法见 **[docs/stations.md](docs/stations.md)**。
 
-配置在哪改：WebUI 面板 → 插件设置 → `littleskin_skin`；或者直接编辑
-`data/config/littleskin_skin_config.json`。
+配置在哪改：WebUI 面板 → 插件设置 → `astrbot_plugin_skinsite_skin`；或者直接编辑
+`data/config/astrbot_plugin_skinsite_skin_config.json`。
 
 > 接新站之前，先跑一遍体检脚本（只读，不会动任何数据）：
 > 
@@ -105,6 +105,7 @@
 - 只取搜索结果第 1 页，没有分页。
 - 不支持上传、改名、删除、登录态皮肤；不碰需要登录/cookie 的站。
 - 披风、盔甲这类非玩家皮肤资源会被当成皮肤渲染（尺寸对得上时）。
+- **皮肤文件是文件附件**：QQ（aiocqhttp）下是群/私聊文件；不支持文件段的平台（如 WebChat）会自动退化成发图片，不会报错。
 
 实现细节（3D 怎么画的、安全边界、文件发送降级策略）见 **[docs/design.md](docs/design.md)**。
 

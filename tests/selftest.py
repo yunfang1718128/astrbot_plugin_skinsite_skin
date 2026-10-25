@@ -41,8 +41,8 @@ for _p in (ROOT, PLUGIN, PLUGINS_DIR):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-# 仓库布局下目录名是 astrbot_plugin_littleskin_skin，而代码里用 `from .render import ...`，
-# 必须以 `littleskin_skin` 这个包名导入。用一个只有 __path__ 的空包把两者接上，
+# 仓库布局下目录名就是插件名，而代码里用 `from .render import ...`，
+# 内部包名固定用 `littleskin_skin`（与目录名无关）。用一个只有 __path__ 的空包把它接上，
 # 比 symlink / 改目录名都干净（AstrBot 实际加载时按目录名建包，不受影响）。
 if os.path.basename(PLUGIN) != "littleskin_skin" and "littleskin_skin" not in sys.modules:
     _pkg = types.ModuleType("littleskin_skin")

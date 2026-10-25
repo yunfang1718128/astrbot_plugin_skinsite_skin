@@ -295,7 +295,7 @@ class SkinSource(ABC):
 
     def __init__(self, site: SiteConfig, logger: logging.Logger | None = None) -> None:
         self.site = site
-        self.logger = logger or logging.getLogger("littleskin_skin")
+        self.logger = logger or logging.getLogger("astrbot_plugin_skinsite_skin")
 
     @property
     def base_url(self) -> str:
@@ -481,7 +481,7 @@ def parse_sites(
     `sites` 为空时退回单站点老配置（site/base_url/allowed_hosts/...），
     因此升级插件不会把已有配置弄丢；多站点就在 `sites` 里一行一个地写。
     """
-    logger = logger or logging.getLogger("littleskin_skin")
+    logger = logger or logging.getLogger("astrbot_plugin_skinsite_skin")
     problems: list[str] = []
     defaults = _site_path_defaults(conf)
     specs: list[SiteSpec] = []
