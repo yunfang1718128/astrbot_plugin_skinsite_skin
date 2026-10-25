@@ -1,0 +1,12 @@
+name: littleskin_skin
+display_name: LittleSkin 皮肤查询
+desc: >
+  对接 LittleSkin 等 Blessing Skin 皮肤站（支持多站点并存），提供 /skin 命令：
+  搜索皮肤、发送 3D 预览图、单独发送可直接下载的皮肤文件（PNG）、随机公开皮肤。
+  同时注册 LLM 工具（littleskin_search / littleskin_sites / littleskin_skin_image），
+  群里直接用自然语言说「给我看看 XX 的皮肤」就能搜索并发图。
+  只读查询，不登录、不上传、不镜像站点。
+short_desc: 搜索 / 下载皮肤（3D 预览 + 原始文件分开发），多站点，支持自然语言
+author: astrbot_mcskin
+version: 1.4.0
+astrbot_version: ">=4.29.0"

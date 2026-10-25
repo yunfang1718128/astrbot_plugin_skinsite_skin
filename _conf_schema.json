@@ -1,0 +1,266 @@
+{
+  "site": {
+    "description": "单站点适配器（`sites` 为空时生效）",
+    "type": "string",
+    "default": "littleskin",
+    "hint": "可选 littleskin / blessing_skin。blessing_skin 是通用扩展位，路由与 littleskin 相同，只需改 base_url。"
+  },
+  "sites": {
+    "description": "多站点清单（每行一个，留空则用下面的单站点配置）",
+    "type": "list",
+    "default": [],
+    "hint": "格式：别名|适配器|站点根|白名单[,白名单]|可选覆盖项。例：ls|littleskin|https://littleskin.cn|littleskin.cn ；再如 bs|blessing_skin|https://skin.example.com|skin.example.com|search_path=/skinlib/list 。可用 -s 别名 指定站点。"
+  },
+  "default_site": {
+    "description": "默认站点别名（不带 -s 时用哪个）",
+    "type": "string",
+    "default": "",
+    "hint": "留空 = sites 里的第一个（单站点配置时就是它自己）。"
+  },
+  "skin_file_mode": {
+    "description": "皮肤文件怎么发",
+    "type": "string",
+    "options": ["file", "image", "both", "none"],
+    "labels": ["文件附件（可直接下载）", "图片", "文件 + 图片", "不发文件"],
+    "default": "file",
+    "hint": "file 走 AstrBot 文件服务 + File 消息段（字节完整，可直接导入游戏/皮肤站）；文件服务不可用时自动退回图片。"
+  },
+  "file_url_base": {
+    "description": "皮肤文件下载地址前缀",
+    "type": "string",
+    "default": "",
+    "hint": "留空则用 AstrBot 全局 callback_api_base；若 NapCat 与 AstrBot 不在同一台机器，必须填 NapCat 能访问到的地址（否则文件会退回图片发送）。"
+  },
+  "include_sheet": {
+    "description": "渲染图里是否包含放大后的原始纹理表",
+    "type": "bool",
+    "default": false,
+    "hint": "默认 false：纹理表由皮肤文件单独发，渲染图只留 3D 预览（+ 可选正面展开）。"
+  },
+  "base_url": {
+    "description": "站点根地址",
+    "type": "string",
+    "default": "https://littleskin.cn",
+    "hint": "必须是 https，且主机名要出现在 allowed_hosts 中。"
+  },
+  "allowed_hosts": {
+    "description": "域名白名单",
+    "type": "list",
+    "default": ["littleskin.cn"],
+    "hint": "只允许这些主机名（含其子域名）。请求前的每一跳都会校验，禁止跳转与内网地址。"
+  },
+  "search_path": {
+    "description": "搜索接口路径",
+    "type": "string",
+    "default": "/skinlib/list"
+  },
+  "search_keyword_param": {
+    "description": "搜索关键词参数名",
+    "type": "string",
+    "default": "keyword",
+    "hint": "LittleSkin 是 keyword，不是 q。"
+  },
+  "search_page_param": {
+    "description": "页码参数名",
+    "type": "string",
+    "default": "page"
+  },
+  "search_random_param": {
+    "description": "随机排序参数名",
+    "type": "string",
+    "default": "order",
+    "hint": "留空则退化为随机页码取第一条。"
+  },
+  "search_random_value": {
+    "description": "随机排序参数值",
+    "type": "string",
+    "default": "random"
+  },
+  "detail_path": {
+    "description": "材质详情接口路径模板",
+    "type": "string",
+    "default": "/texture/{tid}"
+  },
+  "texture_path": {
+    "description": "原始纹理接口路径模板",
+    "type": "string",
+    "default": "/textures/{hash}",
+    "hint": "可用 {hash} 或 {tid}；也可以写完整 URL 模板（如 https://cdn.example.com/{hash}）。注意：LittleSkin 的 /textures/<hash>.png 会 404，正确形式是不带扩展名的 /textures/<hash>。"
+  },
+  "show_path": {
+    "description": "皮肤详情页路径模板（用作 Referer）",
+    "type": "string",
+    "default": "/skinlib/show/{tid}"
+  },
+  "list_key": {
+    "description": "搜索响应里列表所在的位置",
+    "type": "string",
+    "default": "data",
+    "hint": "支持点点路径（如 data.items）；留空表示响应本身就是数组。"
+  },
+  "field_tid": {
+    "description": "字段名：tid",
+    "type": "string",
+    "default": "tid"
+  },
+  "field_name": {
+    "description": "字段名：皮肤名",
+    "type": "string",
+    "default": "name"
+  },
+  "field_type": {
+    "description": "字段名：模型（steve/alex）",
+    "type": "string",
+    "default": "type"
+  },
+  "field_hash": {
+    "description": "字段名：纹理 hash",
+    "type": "string",
+    "default": "hash"
+  },
+  "field_likes": {
+    "description": "字段名：点赞数",
+    "type": "string",
+    "default": "likes"
+  },
+  "field_uploader": {
+    "description": "字段名：上传者昵称（主选）",
+    "type": "string",
+    "default": "nickname"
+  },
+  "field_uploader_fallback": {
+    "description": "字段名：上传者（主选为空时用）",
+    "type": "string",
+    "default": "uploader"
+  },
+  "field_hd": {
+    "description": "字段名：是否 HD",
+    "type": "string",
+    "default": "hd"
+  },
+  "field_public": {
+    "description": "字段名：是否公开",
+    "type": "string",
+    "default": "public"
+  },
+  "field_size": {
+    "description": "字段名：文件大小",
+    "type": "string",
+    "default": "size"
+  },
+  "field_upload_at": {
+    "description": "字段名：上传时间",
+    "type": "string",
+    "default": "upload_at"
+  },
+  "field_texture_url": {
+    "description": "字段名：完整纹理 URL（可选）",
+    "type": "string",
+    "default": "",
+    "hint": "有的站直接返回完整纹理地址（CDN）。填了就优先用它，不再用 texture_path 拼。仍受白名单限制。"
+  },
+  "user_agent": {
+    "description": "请求 User-Agent",
+    "type": "string",
+    "default": "Mozilla/5.0 (X11; Linux x86_64) AstrBot-littleskin-skin/1.0"
+  },
+  "send_referer": {
+    "description": "下载纹理时是否携带 Referer",
+    "type": "bool",
+    "default": true,
+    "hint": "实测 LittleSkin 不带也能下载；保留是为了对第三方站兼容与礼貌。"
+  },
+  "timeout": {
+    "description": "单次请求超时（秒）",
+    "hint": "1~10，超过 10 会被按需求硬性夹紧到 10",
+    "type": "int",
+    "default": 10
+  },
+  "min_interval": {
+    "description": "两次出站请求的最小间隔（秒）",
+    "type": "float",
+    "default": 0.8,
+    "hint": "全局串行（并发 1）+ 间隔限流，避免触发站点 429 / 封 IP。"
+  },
+  "max_queue_wait": {
+    "description": "排队等待限流的最长时间（秒）",
+    "type": "float",
+    "default": 6.0,
+    "hint": "超过则直接回复“请求过于频繁”，不无限排队。"
+  },
+  "user_cooldown": {
+    "description": "同一会话两次命令的最小间隔（秒）",
+    "type": "float",
+    "default": 3.0,
+    "hint": "保护共享的出站节流额度，防止单人刷屏把站点打成 429。设 0 关闭。"
+  },
+  "max_results": {
+    "description": "搜索最多返回条数",
+    "type": "int",
+    "default": 5
+  },
+  "case_fallback": {
+    "description": "搜索无结果时是否尝试大小写变体",
+    "type": "bool",
+    "default": true,
+    "hint": "实测该站搜索区分大小写：GUNDAM 6 条、gundam 1 条、Gundam 7 条。"
+  },
+  "zoom": {
+    "description": "纹理最近邻放大倍数",
+    "hint": "1~32；输出图仍受 max_image_pixels 约束，超预算会自动降低倍数。",
+    "type": "int",
+    "default": 10
+  },
+  "flatten": {
+    "description": "渲染图里是否加入正面展开拼图",
+    "type": "bool",
+    "default": false,
+    "hint": "默认关。打开后渲染图 = 正面展开小条 + 3D 预览（纹理表已改由皮肤文件单独发送）。"
+  },
+  "preview_3d": {
+    "description": "发送皮肤时是否附带 3D 预览条",
+    "type": "bool",
+    "default": true,
+    "hint": "自带正交投影渲染器（preview3d.py），不引入 numpy/three.js/浏览器，也不新增任何出站请求。"
+  },
+  "views_3d": {
+    "description": "3D 预览的视角（度，逗号分隔）",
+    "type": "string",
+    "default": "0, 30, 180",
+    "hint": "0=正面、180=背面，横向拼接，最多 4 个；视角越多图越宽。"
+  },
+  "skin_model": {
+    "description": "模型：auto / steve / alex",
+    "type": "string",
+    "default": "auto",
+    "hint": "auto 按站点返回的 type 字段判定（实测就是 steve/alex）。alex 的手臂宽 3 像素，判错会错位半格。"
+  },
+  "allow_hd": {
+    "description": "是否接受 HD 皮肤（128x128 / 256x256 等）",
+    "type": "bool",
+    "default": true,
+    "hint": "实测 LittleSkin 存在 hd 标记的 128x128 皮肤；关掉它只会误伤正常皮肤，不建议。"
+  },
+  "cache_dir": {
+    "description": "缓存目录（留空 = data/plugin_data/littleskin_skin/cache）",
+    "type": "string",
+    "default": "",
+    "hint": "不建议放在插件目录内：插件更新/重装会覆盖该目录。"
+  },
+  "cache_max_mb": {
+    "description": "缓存总容量上限（MB）",
+    "type": "int",
+    "default": 200
+  },
+  "max_texture_bytes": {
+    "description": "单个纹理下载上限（字节）",
+    "type": "int",
+    "default": 2097152
+  },
+  "max_image_pixels": {
+    "description": "PIL 解码像素上限（防解压炸弹）",
+    "hint": "不超过 4000000（按需求设定）；同时作为发送图的像素预算。",
+    "type": "int",
+    "default": 4000000
+  }
+}

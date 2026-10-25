@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 自测/运行产生的目录（都不该进仓库）
+.test_cache/
+.test_cache_*/
+.live_cache/
+data/
+logs/
+*.log
+
+# 编辑器/系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
