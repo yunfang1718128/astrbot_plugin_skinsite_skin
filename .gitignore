@@ -15,3 +15,7 @@ logs/
 .idea/
 .DS_Store
 Thumbs.db
+
+# logo 生成的中间物
+.logo_preview/
+.tmp_*
