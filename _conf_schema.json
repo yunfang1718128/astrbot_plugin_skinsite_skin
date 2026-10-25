@@ -242,7 +242,7 @@
     "hint": "实测 LittleSkin 存在 hd 标记的 128x128 皮肤；关掉它只会误伤正常皮肤，不建议。"
   },
   "cache_dir": {
-    "description": "缓存目录（留空 = data/plugin_data/littleskin_skin/cache）",
+    "description": "缓存目录（留空 = data/plugin_data/astrbot_plugin_skinsite_skin/cache）",
     "type": "string",
     "default": "",
     "hint": "不建议放在插件目录内：插件更新/重装会覆盖该目录。"
