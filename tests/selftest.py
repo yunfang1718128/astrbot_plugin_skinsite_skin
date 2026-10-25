@@ -239,6 +239,8 @@ def install_astrbot_stub() -> None:
     filter_mod.CustomFilter = BaseCustomFilter
     astrbot.api = api
     astrbot.core = core
+    # 插件侧统一 `from astrbot.api import logger`，桩里给出标准 logger 即可。
+    api.logger = logging.getLogger("astrbot_stub")
     comp_mod = types.ModuleType("astrbot.api.message_components")
     comp_mod.Image = Image
     comp_mod.Plain = Plain

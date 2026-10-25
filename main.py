@@ -17,13 +17,12 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import io
-import logging
 import os
 import re
 import time
 from dataclasses import dataclass
 
-from astrbot.api import star
+from astrbot.api import logger, star
 from astrbot.api.event import AstrMessageEvent, MessageChain, filter
 from astrbot.api.message_components import File, Image, Plain
 from astrbot.core.star.filter.command import GreedyStr
@@ -145,7 +144,7 @@ class Main(star.Star):
         except TypeError:  # 兼容只接受 context 的旧版 Star
             super().__init__(context)
         self.conf: dict = dict(config or {})
-        self.logger = getattr(self, "logger", None) or logging.getLogger("astrbot_plugin_skinsite_skin")
+        self.logger = getattr(self, "logger", None) or logger
         self.sites: list[SiteRuntime] = []
         self.default: SiteRuntime | None = None
         self.cache: TextureCache | None = None
@@ -823,7 +822,7 @@ def render_to_bytes(image, plan: dict) -> bytes:
         # 3D 只是附加的一栏，渲染不出来时宁可退回 2D，也不能整条消息失败。
         if not plan.get("three_d"):
             raise
-        logging.getLogger("astrbot_plugin_skinsite_skin").warning("3d preview failed: %s", exc)
+        logger.warning("3d preview failed: %s", exc)
         out = render_preview(image, **{**plan, "three_d": False})
     buf = io.BytesIO()
     out.save(buf, format="PNG", optimize=True)

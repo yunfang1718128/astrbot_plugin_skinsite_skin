@@ -3,19 +3,19 @@
 只负责“把某个站的 HTTP 接口翻译成本地数据结构”，不做下载、不做渲染。
 新增一个站 = 继承 SkinSource（或复用 BlessingSkinSource）并注册到 SOURCES。
 
-本模块及其同级模块（textures.py / render.py）刻意不 import astrbot，
-以便脱离 AstrBot 运行时单独自测。
+日志统一走 astrbot.api 的 logger（可注入覆盖），脱离 AstrBot 自测时用 astrbot 桩。
 """
 
 from __future__ import annotations
 
-import logging
 import random
 import re
 import unicodedata
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
+
+from astrbot.api import logger as default_logger
 
 NOT_FOUND = "未找到"
 
@@ -293,9 +293,9 @@ class SkinSource(ABC):
 
     name: str = "base"
 
-    def __init__(self, site: SiteConfig, logger: logging.Logger | None = None) -> None:
+    def __init__(self, site: SiteConfig, logger: Any | None = None) -> None:
         self.site = site
-        self.logger = logger or logging.getLogger("astrbot_plugin_skinsite_skin")
+        self.logger = logger or default_logger
 
     @property
     def base_url(self) -> str:
@@ -474,14 +474,14 @@ def _hosts_from(raw: str, base_url: str) -> tuple[str, ...]:
 
 def parse_sites(
     conf: dict[str, Any],
-    logger: logging.Logger | None = None,
+    logger: Any | None = None,
 ) -> tuple[list[SiteSpec], list[str]]:
     """把配置解析成站点列表（按顺序）。返回 (站点, 问题清单)。
 
     `sites` 为空时退回单站点老配置（site/base_url/allowed_hosts/...），
     因此升级插件不会把已有配置弄丢；多站点就在 `sites` 里一行一个地写。
     """
-    logger = logger or logging.getLogger("astrbot_plugin_skinsite_skin")
+    logger = logger or default_logger
     problems: list[str] = []
     defaults = _site_path_defaults(conf)
     specs: list[SiteSpec] = []
@@ -563,7 +563,7 @@ def parse_sites(
     return specs, problems
 
 
-def build_source(spec: SiteSpec, logger: logging.Logger | None = None) -> SkinSource:
+def build_source(spec: SiteSpec, logger: Any | None = None) -> SkinSource:
     cls = SOURCES.get(spec.adapter)
     if cls is None:
         raise ValueError(

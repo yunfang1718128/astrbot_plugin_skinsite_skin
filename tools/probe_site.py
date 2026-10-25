@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import logging
 import os
 import sys
 import tempfile
@@ -36,6 +37,17 @@ import types
 
 _PLUGIN_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(_PLUGIN_DIR))  # 让 `import littleskin_skin` 成立
+
+# 插件模块统一 `from astrbot.api import logger`；本脚本不跑在 AstrBot 里，补一个最小桩。
+try:
+    from astrbot.api import logger as _astrbot_logger  # noqa: F401
+except ImportError:
+    _astrbot = sys.modules.get("astrbot") or types.ModuleType("astrbot")
+    _api = types.ModuleType("astrbot.api")
+    _api.logger = logging.getLogger("probe_site")
+    _astrbot.api = _api
+    sys.modules.setdefault("astrbot", _astrbot)
+    sys.modules["astrbot.api"] = _api
 
 # 仓库目录名（astrbot_plugin_littleskin_skin）与包名（littleskin_skin）不一致时，
 # 用一个只有 __path__ 的空包把导入接上（AstrBot 实际加载按目录名，不影响运行）。

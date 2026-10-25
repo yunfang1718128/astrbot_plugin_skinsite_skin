@@ -6,7 +6,7 @@
 - 只访问白名单域名，禁止跟随跳转，禁止解析到内网/环回/保留地址。
 - 缓存文件名只由校验过的 hash / tid 生成，绝不拼接用户输入。
 
-本模块不 import astrbot，便于脱离 AstrBot 运行时单独自测。
+日志走 astrbot.api 的 logger，脱离 AstrBot 自测时用 astrbot 桩。
 """
 
 from __future__ import annotations
@@ -15,7 +15,6 @@ import asyncio
 import contextlib
 import io
 import ipaddress
-import logging
 import os
 import re
 import socket
@@ -26,7 +25,7 @@ import aiohttp
 from PIL import Image, UnidentifiedImageError
 from yarl import URL
 
-logger = logging.getLogger("littleskin_skin")
+from astrbot.api import logger
 
 HEX_RE = re.compile(r"\A[0-9a-fA-F]{8,128}\Z")
 TID_RE = re.compile(r"\A\d{1,16}\Z")

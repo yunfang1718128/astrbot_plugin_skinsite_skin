@@ -7,14 +7,14 @@
 | 文件 | 职责 |
 | --- | --- |
 | `main.py` | AstrBot 侧的一切：命令组、裸关键词 `CustomFilter`、3 个 LLM 工具、站点选择、消息组装 |
-| `sources.py` | 站点适配器与多站点解析（`SiteSpec` / `FieldMap` / `parse_sites`），不 import astrbot |
-| `textures.py` | HTTP 客户端（SSRF 白名单、限流闸口）、纹理校验、磁盘缓存（LRU），不 import astrbot |
+| `sources.py` | 站点适配器与多站点解析（`SiteSpec` / `FieldMap` / `parse_sites`），日志走 `astrbot.api.logger` |
+| `textures.py` | HTTP 客户端（SSRF 白名单、限流闸口）、纹理校验、磁盘缓存（LRU），日志走 `astrbot.api.logger` |
 | `preview3d.py` | 纯 PIL 的玩家模型 3D 渲染器 |
 | `render.py` | 放大、正面展开、拼图 |
 | `tools/probe_site.py` | 接新站体检（五步） |
 | `tests/selftest.py` | 67 项离线 + 4 项 live 冒烟，内置 astrbot 模块桩 |
 
-`sources` / `textures` / `render` / `preview3d` 刻意不依赖 astrbot，所以能脱离运行时自测。
+`render` / `preview3d` 不依赖 astrbot；`sources` / `textures` 只用 `astrbot.api.logger`，自测与体检脚本自带最小 astrbot 桩，因此仍能脱离运行时跑。
 
 ## 两种出口，一套业务层
 
