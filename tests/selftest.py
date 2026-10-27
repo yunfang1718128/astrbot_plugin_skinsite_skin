@@ -1128,6 +1128,73 @@ def offline_tests() -> None:
             f"{red} of {lg.size}",
         )
 
+        # 19e2. 旧表的左臂 / 左腿是右侧件关于 x=0 平面的镜像：横向位置必须各自从自己的
+        # 右件推。手臂在身体外侧、腿在身体下方，共用一套 x 会让左腿跑到左臂下面。
+        bad = []
+        for slim in (False, True):
+            modern = {p.name: p.box for p in model_parts(slim, False)}
+            old = {p.name: p.box for p in model_parts(slim, True)}
+            for name in ("left_arm", "left_leg"):
+                if old[name] != modern[name]:
+                    bad.append(f"slim={slim} {name}:{old[name]}!={modern[name]}")
+        check("旧表左臂/左腿与现代表同位", not bad, ";".join(bad[:2]))
+
+        # 19e3. 渲染出的两条腿必须并排在身体正下方（群里实测到的「左腿分离」）
+        def legacy_limb_sheet():
+            """只给旧表里真实存在的格子上色：身 / 右腿（左腿靠镜像复用右腿）。"""
+            sh = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+            dr = ImageDraw.Draw(sh)
+            for part in model_parts():
+                if part.name not in ("body", "right_leg"):
+                    continue
+                w, h, d = part_size(part, 1.0)
+                rect = face_rects(part.tex[0], part.tex[1], w, h, d)["front"]
+                dr.rectangle(
+                    [rect[0], rect[1], rect[0] + rect[2] - 1, rect[1] + rect[3] - 1],
+                    fill=FACE_COLORS[part.name] + (255,),
+                )
+            return sh
+
+        lf = render_views(legacy_limb_sheet(), views=(0.0,), pitch=0.0, scale=2.0)
+        body_box = bbox_of(lf, shaded(FACE_COLORS["body"], 0.8))
+        leg_box = bbox_of(lf, shaded(FACE_COLORS["right_leg"], 0.8))
+        check(
+            "旧表两条腿并排在身体下方",
+            body_box is not None
+            and leg_box is not None
+            and box_size(leg_box) == (16, 24)
+            and abs(leg_box[0] - body_box[0]) <= 1
+            and abs(leg_box[2] - body_box[2]) <= 1,
+            f"腿={leg_box} 身={body_box}",
+        )
+
+        # 19e4. 旧表只有帽子一层覆盖层：外套 / 袖子 / 裤腿那三格根本不存在。
+        # 2D 正面展开与 3D 预览都读这张部件表，所以一处说清就不会两边各说各话。
+        bad = []
+        for slim in (False, True):
+            ov = {p.name: p.overlay_tex for p in model_parts(slim, True)}
+            if ov["head"] != (32, 0):
+                bad.append(f"帽子层被丢了:{ov['head']}")
+            for name in ("body", "right_arm", "left_arm", "right_leg", "left_leg"):
+                if ov[name] is not None:
+                    bad.append(f"{name}不该有覆盖层:{ov[name]}")
+        check("旧表覆盖层只剩帽子", not bad, ";".join(bad[:2]))
+
+        # 19e5. 帽子层在旧表上真的画得出来（以前 overlays=not legacy 一刀切，头发外壳整块消失）
+        hat_sheet = legacy_limb_sheet()
+        hw, hh, hd = part_size(model_parts()[0], 1.0)
+        hr = face_rects(32, 0, hw, hh, hd)["front"]
+        ImageDraw.Draw(hat_sheet).rectangle(
+            [hr[0], hr[1], hr[0] + hr[2] - 1, hr[1] + hr[3] - 1], fill=(200, 200, 200, 255)
+        )
+        hf = render_views(hat_sheet, views=(0.0,), pitch=0.0, scale=2.0)
+        legacy_hat = bbox_of(hf, shaded((200, 200, 200), FACE_LIGHT["front"]))
+        check(
+            "旧表仍渲染帽子层",
+            legacy_hat is not None and box_size(legacy_hat) == (18, 18),
+            str(box_size(legacy_hat)) if legacy_hat else "没画出来",
+        )
+
         # 19f. 3D 条也要吃像素预算
         out3 = render_preview(front_labeled_sheet(), zoom=10, flatten=True, three_d=True, max_pixels=60_000)
         check("3D 拼图受像素预算约束", out3.width * out3.height <= 60_000, f"{out3.width}x{out3.height}")

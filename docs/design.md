@@ -12,7 +12,7 @@
 | `preview3d.py` | 纯 PIL 的玩家模型 3D 渲染器 |
 | `render.py` | 放大、正面展开、拼图 |
 | `tools/probe_site.py` | 接新站体检（五步） |
-| `tests/selftest.py` | 67 项离线 + 4 项 live 冒烟，内置 astrbot 模块桩 |
+| `tests/selftest.py` | 71 项离线 + 4 项 live 冒烟，内置 astrbot 模块桩 |
 
 `render` / `preview3d` 不依赖 astrbot；`sources` / `textures` 只用 `astrbot.api.logger`，自测与体检脚本自带最小 astrbot 桩，因此仍能脱离运行时跑。
 
@@ -58,7 +58,10 @@ upload_group_file / upload_private_file（aiocqhttp/NapCat，file 传 token URL�
 
 - 展开格由 `face_rects()` 一处算出：2D 展开与 3D 预览共用同一份模型定义。
 - `skin_model=auto` 按站点 `type` 字段判定 steve / alex；alex 手臂宽 3 像素，判错会错位半格。
-- 64×32 旧表没有左半边，左臂/左腿按游戏规则水平镜像复用右侧展开，且不叠覆盖层。
+- 64×32 旧表没有左半边，左臂/左腿按游戏规则水平镜像复用右侧展开；镜像是「右件关于 x=0 平面」，
+  所以腿落在身体下方（不是跟着手臂跑到体外），腿宽也不随 alex 收窄。
+- 旧表只有帽子一层覆盖层（`(32,0)` 在 64×32 里真实存在）；外套 / 袖子 / 裤腿那三格不存在，
+  由 `model_parts(legacy=True)` 把对应 `overlay_tex` 置 None 表达——2D 展开与 3D 预览读同一张表。
 - 成本：64×64 三视角约 13ms（`asyncio.to_thread` 里跑），输出约 22KB PNG。
 - 静态正交投影：无关节、无动画、无深度缓冲（个别互相穿插的面排序可能不理想）。
 
@@ -83,7 +86,7 @@ upload_group_file / upload_private_file（aiocqhttp/NapCat，file 传 token URL�
 ## 测试
 
 ```bash
-python tests/selftest.py          # 67 项，离线，本地 mock 站（三种字段风格）
+python tests/selftest.py          # 71 项，离线，本地 mock 站（三种字段风格）
 python tests/selftest.py --live   # 追加 4 项对 littleskin.cn 的只读冒烟
 ```
 
@@ -94,4 +97,5 @@ python tests/selftest.py --live   # 追加 4 项对 littleskin.cn 的只读冒�
 
 覆盖点（挑要紧的）：多站点路由与逐站白名单、字段名映射、完整纹理 URL、`/skin get` 两条消息、
 `skin_file_mode` 三种模式、OneBot 文件上传失败回退、SSRF 拦截（含冷门 3xx）、
-超时/断网/排队、纹理与输出尺寸、缓存 LRU 与 `.part` 回收、3D 六个面逐一比对、工具冷却。
+超时/断网/排队、纹理与输出尺寸、缓存 LRU 与 `.part` 回收、3D 六个面逐一比对、
+旧表左腿位置与帽子层（回归即报）、工具冷却。

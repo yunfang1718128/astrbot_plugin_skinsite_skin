@@ -95,7 +95,7 @@
 | ----------- | -------------------------------------------------------------------------------- |
 | 搜不到东西       | 站点搜索区分大小写，换个写法；或 `/skin sites` 确认查的是哪个站                                          |
 | 只收到图、没收到文件  | 文件服务没配好：看 `file_url_base` / AstrBot 全局 `callback_api_base`（异机部署要填 NapCat 能访问的地址） |
-| 想确认是不是插件的问题 | `python tests/selftest.py`（离线自测，67 项）                                            |
+| 想确认是不是插件的问题 | `python tests/selftest.py`（离线自测，71 项）                                            |
 | 想接新站        | `python tools/probe_site.py …` 体检                                                |
 | 看日志         | `journalctl -u astrbot                                                           |
 

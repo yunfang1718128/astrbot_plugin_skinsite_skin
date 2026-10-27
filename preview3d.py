@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from PIL import Image, ImageChops, ImageDraw
 
@@ -69,13 +69,22 @@ def build_parts(slim: bool = False) -> tuple[Part, ...]:
     )
 
 
-def legacy_mirrors(parts: tuple[Part, ...], arm_w: float) -> tuple[Part, Part]:
-    """64x32 旧表没有左半边，左臂/左腿按游戏的镜像规则复用右侧展开。"""
+def legacy_mirrors(parts: tuple[Part, ...]) -> tuple[Part, Part]:
+    """64x32 旧表没有左半边，左臂/左腿按游戏的镜像规则复用右侧展开。
+
+    左件是右件关于 x=0 平面的镜像：手臂在身体外侧、腿在身体下方，
+    两者的横向位置规则不同，所以必须各自从自己的右件推，不能共用一套 x。
+    腿宽同理跟右腿（游戏里腿不随 alex 收窄）。
+    """
     right_arm, right_leg = parts[2], parts[4]
-    x0, x1 = 4.0, 4.0 + arm_w
+
+    def mirrored(part: Part) -> tuple[float, float, float, float, float, float]:
+        x0, y0, z0, x1, y1, z1 = part.box
+        return (-x1, y0, z0, -x0, y1, z1)
+
     return (
-        Part("left_arm", (x0, 12.0, -2.0, x1, 24.0, 2.0), right_arm.tex, None, True),
-        Part("left_leg", (x0, 0.0, -2.0, x1, 12.0, 2.0), right_leg.tex, None, True),
+        Part("left_arm", mirrored(right_arm), right_arm.tex, None, True),
+        Part("left_leg", mirrored(right_leg), right_leg.tex, None, True),
     )
 
 
@@ -88,8 +97,9 @@ def model_parts(slim: bool = False, legacy: bool = False) -> tuple[Part, ...]:
     """2D 展开图与 3D 预览共用同一份模型定义，避免两处坐标各说各话。"""
     parts = list(build_parts(slim))
     if legacy:
-        arm_w = parts[2].box[3] - parts[2].box[0]
-        parts[3], parts[5] = legacy_mirrors(tuple(parts), arm_w)
+        # 旧表只有帽子一层覆盖层（(32,0)）；外套 / 袖子 / 裤腿那三格根本不存在
+        parts = [p if p.name == "head" else replace(p, overlay_tex=None) for p in parts]
+        parts[3], parts[5] = legacy_mirrors(tuple(parts))
     return tuple(parts)
 
 
@@ -301,7 +311,7 @@ def render_views(
     k = sheet.width / 64.0
     legacy = is_legacy(sheet.width, sheet.height)
     parts = model_parts(slim, legacy)
-    overlays = not legacy
+    overlays = True  # 有没有覆盖层由各部件的 overlay_tex 自己说（旧表只留帽子）
     if scale is None:
         scale = max(48, min(int(figure_height), 1024)) / _MODEL_SPAN
     scale = max(0.25, min(float(scale), 64.0))
